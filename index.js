@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Create Gmail SMTP transporter
+// ✅ Create SMTP transporter (Gmail)
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
@@ -22,7 +22,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // ✅ Verify SMTP connection
-transporter.verify((error) => {
+transporter.verify((error, success) => {
   if (error) {
     console.error("❌ SMTP Error:", error);
   } else {
@@ -30,21 +30,19 @@ transporter.verify((error) => {
   }
 });
 
-// ✅ Health check route
+// ✅ Root route
 app.get("/", (req, res) => {
-  res.status(200).send("SMTP Server Running 🚀");
+  res.status(200).send("Server Running 🚀");
 });
 
 // ✅ Send Email Route
 app.post("/send-email", async (req, res) => {
   try {
-    // Safe destructuring
-    const name = req.body?.name;
-    const email = req.body?.email;
+    const { name, email } = req.body || {};
 
     if (!name || !email) {
       return res.status(400).json({
-        error: "Missing name or email",
+        error: "Name and Email are required",
       });
     }
 
@@ -62,17 +60,15 @@ app.post("/send-email", async (req, res) => {
           Greetings from the Entrepreneurship Cell, JNCT & LNCTS!<br><br>
 
           Thank you for registering for 
-          <b>ComicPreneur 2026 – “AI Tools × Human Creativity: Building Startups of the Future.”</b><br><br>
+          <b>ComicPreneur 2026 – AI Tools × Human Creativity</b>.<br><br>
 
           ✅ Your registration has been successfully confirmed.<br><br>
 
-          <b>Date:</b> 16th April, 2026 (Thursday)<br>
+          <b>Date:</b> 16th April, 2026<br>
           <b>Time:</b> 9:00 AM – 3:30 PM<br>
           <b>Venue:</b> Auditorium, JNCT, Bhopal<br><br>
 
-          Get ready to explore AI, creativity and startup innovation 🚀<br><br>
-
-          We look forward to your participation!
+          Get ready for an amazing experience 🚀
           </p>
         </div>
       `,
@@ -97,7 +93,9 @@ app.post("/send-email", async (req, res) => {
   }
 });
 
-// ❌ DO NOT use app.listen() on Vercel
+// ✅ IMPORTANT: Use dynamic PORT for Render
+const PORT = process.env.PORT || 3000;
 
-// ✅ Export for Vercel
-module.exports = app;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
